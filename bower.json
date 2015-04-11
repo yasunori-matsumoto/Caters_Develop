@@ -14,11 +14,11 @@
     "tests"
   ],
   "dependencies": {
-    "jquery-easing": "*",
+    "jquery-easing" : "*",
     "jquery.transit": "~0.9.12",
-    "jquery": "~2.1.3",
-    "modernizer": "~2.8.2",
-    "jquery-ui": "~1.11.4"
+    "jquery"        : "~2.1.3",
+    "modernizer"    : "~2.8.2",
+    "jquery-ui"     : "~1.11.4"
   },
   "homepage": "https://github.com/yasunori-matsumoto/Caters_Develop"
 }

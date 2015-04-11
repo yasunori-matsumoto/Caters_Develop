@@ -1,0 +1,23 @@
+{
+  "name": "projectName",
+  "version": "0.0.0",
+  "description": "test",
+  "moduleType": [
+    "node"
+
+  "authors": [
+    "Caters.inc"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+  ],
+  "dependencies": {
+    "jquery-easing": "*",
+    "jquery.transit": "~0.9.12",
+    "jquery": "~2.1.3",
+    "modernizer": "~2.8.2"
+  }
+}

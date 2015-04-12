@@ -13,13 +13,14 @@ var del            = require('del');
 var plumber        = require('gulp-watch');
 var plumber        = require('gulp-plumber');
 var concat         = require('gulp-concat');
+var browserify     = require("browserify");
 
 //js
 var typescript     = require('gulp-typescript');
 var uglify         = require('gulp-uglify');
 
 //css
-var sass           = require('gulp-sass');
+var sass           = require('gulp-ruby-sass');
 var pleeease       = require('gulp-pleeease');
 
 //html
@@ -42,7 +43,7 @@ gulp.task('bower', ['clear-libs'], function() {
 gulp.task('sass', function(){
   gulp.src(dir.src + '**/*.scss')
   .pipe(plumber)
-  .pipe(sass())
+  .pipe(rubySass())
   .pipe(pleeease({
     fallbacks: {
         autoprefixer: ['last 4 versions']
@@ -68,7 +69,8 @@ gulp.task('jade', function () {
 var typescriptProject = typescript.createProject({
   target         : "ES5",
   removeComments : true,
-  sortOutput     : true
+  sortOutput     : true,
+  module         :"amd"
 });
 
 gulp.task('typescript', function(){

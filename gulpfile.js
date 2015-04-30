@@ -1,4 +1,4 @@
-var IS_MIN = false;
+var IS_MIN = true;
 
 var dir = {
   src  : 'src/',
@@ -10,21 +10,32 @@ var dir = {
 var gulp           = require('gulp');
 var mainBowerFiles = require('main-bower-files');
 var del            = require('del');
-var plumber        = require('gulp-watch');
 var plumber        = require('gulp-plumber');
 var concat         = require('gulp-concat');
 var browserify     = require("browserify");
+var changed        = require('gulp-changed');
+var gulpif         = require('gulp-if');
+var useref         = require('gulp-useref');
+var fs             = require('fs');
+var path           = require('path');
+var glob           = require('glob');
+var rename         = require('gulp-rename');
 
 //js
 var typescript     = require('gulp-typescript');
 var uglify         = require('gulp-uglify');
 
 //css
-var sass           = require('gulp-ruby-sass');
+var sass           = require('gulp-sass');
 var pleeease       = require('gulp-pleeease');
 
 //html
 var jade           = require('gulp-jade');
+var htmlmin        = require('gulp-minify-html');
+
+//image
+var imagemin       = require('gulp-imagemin');
+var pngquant       = require('imagemin-pngquant');
 
 
 //  Bower Settings  ----------------------------------
@@ -33,31 +44,36 @@ gulp.task('clear-libs', function() {
 });
 
 gulp.task('bower', ['clear-libs'], function() {
-  gulp.src(mainBowerFiles())
+  gulp.src(mainBowerFiles({debugging:true, checkExistence:true}))
   .pipe(concat('libs.js'))
-  .pipe(uglify())
+  .pipe(gulpif(IS_MIN, uglify()))
   .pipe(gulp.dest(dir.dest + 'common/js'));
+});
+
+//  copy_defaut  ----------------------------------
+gulp.task('copy-static', function() {
+gulp.src([dir.src + '**/*.css', dir.src + '**/*.inc', dir.src + '**/*.js', dir.src + '**/*.def', dir.src + '**/*.xml', dir.src + '**/*.mp4'])
+  .pipe(changed( dir.dest ))
+  .pipe(gulp.dest(dir.dest));
 });
 
 //  sass  ----------------------------------
 gulp.task('sass', function(){
-  gulp.src(dir.src + '**/*.scss')
-  .pipe(plumber)
-  .pipe(rubySass())
+  gulp.src([dir.src + '**/*.scss'])
+  .pipe(plumber())
+  .pipe(sass())
   .pipe(pleeease({
-    fallbacks: {
-        autoprefixer: ['last 4 versions']
+    autoprefixer: {
+        browsers: ['last 4 versions']
     },
-    optimizers: {
-        minifier: IS_MIN
-    }
+    minifier: IS_MIN
   }))
   .pipe(gulp.dest(dir.dest));
 });
 
 //  jade  ----------------------------------
 gulp.task('jade', function () {
-  gulp.src(dir.src + '**/*.jade')
+  gulp.src([dir.src + '**/*.jade' , '!' + dir.src + '**/_includes/*'])
     .pipe(plumber())
     .pipe(jade({
       pretty: true
@@ -65,20 +81,49 @@ gulp.task('jade', function () {
     .pipe(gulp.dest(dir.dest));
 });
 
+//image ----------------------------------
+gulp.task( 'imagemin', function(){
+  var srcGlob = dir.src + '/**/*.+(jpg|jpeg|png|gif|svg)';
+  var imageminOptions = {
+    optimizationLevel: 3,
+    use: [pngquant({
+      quality: 60-75,
+      speed: 1
+    })]
+  };
+
+  gulp.src( dir.src + '/**/*.+(jpg|jpeg|png|gif|svg)' )
+    .pipe(changed( dir.dest ))
+    .pipe(imagemin())
+    .pipe(gulp.dest( dir.dest ));
+});
+
 //  js  ----------------------------------
 var typescriptProject = typescript.createProject({
   target         : "ES5",
   removeComments : true,
   sortOutput     : true,
-  module         :"amd"
+  noImplicitAny  : false,
+  noEmitOnError  : false,
+  module         :"commonjs"
 });
 
 gulp.task('typescript', function(){
   gulp.src([dir.src + '**/*.ts'])
     .pipe(typescript(typescriptProject))
     .js
+    .pipe(gulpif(IS_MIN, uglify()))
     .pipe(gulp.dest(dir.dest));
 });
+
+// publishJS
+/*
+gulp.task('publishJS', function() {
+  return gulp.src(dir.dest + '/d-navi/js/dn_*.js')
+  .pipe(concat('dn.min.js'))
+  .pipe(gulp.dest(dir.dest + '/d-navi/js'));
+});
+*/
 
 //  watch  ----------------------------------
 gulp.task('watch', function () {

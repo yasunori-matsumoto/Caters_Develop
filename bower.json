@@ -15,9 +15,9 @@
   ],
   "dependencies": {
     "modernizr": "~2.8.2",
+    "jquery-legacy": "jquery#^1",
     "jquery-easing": "*",
-    "jquery.transit": "~0.9.12",
-    "jquery-ui": "~1.11.4"
+    "jquery.transit": "~0.9.12"
   },
   "devDependencies": {
     "modernizr": "~2.8.3",

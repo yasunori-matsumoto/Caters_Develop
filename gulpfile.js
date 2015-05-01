@@ -1,4 +1,4 @@
-var IS_MIN = true;
+var IS_MIN = false;
 
 var dir = {
   src  : 'src/',

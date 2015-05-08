@@ -11,12 +11,17 @@
     "bower": "^1.4.1",
     "browserify": "^9.0.8",
     "del": "^1.1.1",
+    "globule": "^0.2.0",
     "gulp": "^3.8.11",
     "gulp-changed": "^1.2.1",
     "gulp-concat": "^2.5.2",
+    "gulp-csscomb": "^3.0.3",
+    "gulp-filter": "^2.0.2",
+    "gulp-folders": "^1.1.0",
     "gulp-if": "^1.2.5",
     "gulp-imagemin": "^2.2.1",
     "gulp-jade": "^1.0.0",
+    "gulp-minify-html": "^1.0.2",
     "gulp-pleeease": "^1.2.0",
     "gulp-plumber": "^1.0.0",
     "gulp-rename": "^1.2.2",
@@ -27,7 +32,8 @@
     "gulp-useref": "^1.1.2",
     "gulp-watch": "^4.2.4",
     "imagemin-pngquant": "^4.0.0",
-    "main-bower-files": "^2.6.2"
+    "main-bower-files": "^2.6.2",
+    "path": "^0.11.14"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

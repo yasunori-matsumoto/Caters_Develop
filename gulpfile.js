@@ -16,10 +16,8 @@ var browserify     = require("browserify");
 var changed        = require('gulp-changed');
 var gulpif         = require('gulp-if');
 var useref         = require('gulp-useref');
-var fs             = require('fs');
-var path           = require('path');
-var glob           = require('glob');
 var rename         = require('gulp-rename');
+var replace        = require('gulp-replace');
 
 //js
 var typescript     = require('gulp-typescript');
@@ -31,7 +29,6 @@ var pleeease       = require('gulp-pleeease');
 
 //html
 var jade           = require('gulp-jade');
-var htmlmin        = require('gulp-minify-html');
 
 //image
 var imagemin       = require('gulp-imagemin');
@@ -68,6 +65,7 @@ gulp.task('sass', function(){
     },
     minifier: IS_MIN
   }))
+  .pipe(replace(/  /g, '\t'))
   .pipe(gulp.dest(dir.dest));
 });
 
@@ -78,6 +76,7 @@ gulp.task('jade', function () {
     .pipe(jade({
       pretty: true
     }))
+    .pipe(replace(/  /g, '\t'))
     .pipe(gulp.dest(dir.dest));
 });
 
@@ -113,6 +112,7 @@ gulp.task('typescript', function(){
     .pipe(typescript(typescriptProject))
     .js
     .pipe(gulpif(IS_MIN, uglify()))
+    .pipe(gulpif(!IS_MIN, replace(/    /g, '\t')))
     .pipe(gulp.dest(dir.dest));
 });
 

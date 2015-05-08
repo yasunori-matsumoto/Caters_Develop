@@ -1,4 +1,5 @@
 var IS_MIN = false;
+var JS_MIN = true;
 
 var dir = {
   src  : 'src/',
@@ -16,10 +17,8 @@ var browserify     = require("browserify");
 var changed        = require('gulp-changed');
 var gulpif         = require('gulp-if');
 var useref         = require('gulp-useref');
-var fs             = require('fs');
-var path           = require('path');
-var glob           = require('glob');
 var rename         = require('gulp-rename');
+var replace        = require('gulp-replace');
 
 //js
 var typescript     = require('gulp-typescript');
@@ -27,6 +26,7 @@ var uglify         = require('gulp-uglify');
 
 //css
 var sass           = require('gulp-sass');
+var csscomb        = require('gulp-csscomb');
 var pleeease       = require('gulp-pleeease');
 
 //html
@@ -43,11 +43,11 @@ gulp.task('clear-libs', function() {
     del.sync(dir.dest + 'lib/');
 });
 
-gulp.task('bower', ['clear-libs'], function() {
+gulp.task('bower', function() {
   gulp.src(mainBowerFiles({debugging:true, checkExistence:true}))
   .pipe(concat('libs.js'))
-  .pipe(gulpif(IS_MIN, uglify()))
-  .pipe(gulp.dest(dir.dest + 'common/js'));
+  .pipe(uglify())
+  .pipe(gulp.dest(dir.src + 'common/js'));
 });
 
 //  copy_defaut  ----------------------------------
@@ -61,13 +61,16 @@ gulp.src([dir.src + '**/*.css', dir.src + '**/*.inc', dir.src + '**/*.js', dir.s
 gulp.task('sass', function(){
   gulp.src([dir.src + '**/*.scss'])
   .pipe(plumber())
-  .pipe(sass())
+  .pipe(sass({
+    outputStyle:'nested'
+  }))
   .pipe(pleeease({
     autoprefixer: {
-        browsers: ['last 4 versions']
+        autoprefixer: ['last 4 versions']
     },
     minifier: IS_MIN
   }))
+  .pipe(gulpif(!IS_MIN, replace(/    /g, '\t')))
   .pipe(gulp.dest(dir.dest));
 });
 
@@ -78,6 +81,7 @@ gulp.task('jade', function () {
     .pipe(jade({
       pretty: true
     }))
+    .pipe(replace(/  /g, '\t'))
     .pipe(gulp.dest(dir.dest));
 });
 
@@ -112,7 +116,8 @@ gulp.task('typescript', function(){
   gulp.src([dir.src + '**/*.ts'])
     .pipe(typescript(typescriptProject))
     .js
-    .pipe(gulpif(IS_MIN, uglify()))
+    .pipe(gulpif(JS_MIN, uglify()))
+    .pipe(gulpif(!JS_MIN, replace(/    /g, '\t')))
     .pipe(gulp.dest(dir.dest));
 });
 

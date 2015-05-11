@@ -26,7 +26,6 @@ var uglify         = require('gulp-uglify');
 
 //css
 var sass           = require('gulp-sass');
-var csscomb        = require('gulp-csscomb');
 var pleeease       = require('gulp-pleeease');
 
 //html
@@ -52,9 +51,9 @@ gulp.task('bower', function() {
 
 //  copy_defaut  ----------------------------------
 gulp.task('copy-static', function() {
-gulp.src([dir.src + '**/*.css', dir.src + '**/*.inc', dir.src + '**/*.js', dir.src + '**/*.def', dir.src + '**/*.xml', dir.src + '**/*.mp4'])
-  .pipe(changed( dir.dest ))
-  .pipe(gulp.dest(dir.dest));
+  gulp.src([dir.src + '**/*.css', dir.src + '**/*.inc', dir.src + '**/*.js', dir.src + '**/*.def', dir.src + '**/*.xml', dir.src + '**/*.mp4'])
+    .pipe(changed( dir.dest ))
+    .pipe(gulp.dest(dir.dest));
 });
 
 //  sass  ----------------------------------

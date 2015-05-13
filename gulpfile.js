@@ -69,7 +69,7 @@ gulp.task('sass', function(){
     },
     minifier: IS_MIN
   }))
-  .pipe(gulpif(!IS_MIN, replace(/    /g, '\t')))
+  .pipe(gulpif(!IS_MIN, replace(/  /g, '\t')))
   .pipe(gulp.dest(dir.dest));
 });
 

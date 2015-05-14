@@ -3,7 +3,7 @@
 // Definitions by: Greg Smith <https://github.com/smrq/>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-/// <reference path="../jquery/jquery.d.ts" />
+/// <reference path="jquery.d.ts" />
 
 interface JQuery {
 	velocity(options: {properties: Object; options: jquery.velocity.VelocityOptions}): JQuery;

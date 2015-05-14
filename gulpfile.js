@@ -13,7 +13,6 @@ var mainBowerFiles = require('main-bower-files');
 var del            = require('del');
 var plumber        = require('gulp-plumber');
 var concat         = require('gulp-concat');
-var browserify     = require("browserify");
 var changed        = require('gulp-changed');
 var gulpif         = require('gulp-if');
 var useref         = require('gulp-useref');
@@ -59,6 +58,7 @@ gulp.task('copy-static', function() {
 //  sass  ----------------------------------
 gulp.task('sass', function(){
   gulp.src([dir.src + '**/*.scss'])
+  .pipe(changed( dir.dest ))
   .pipe(plumber())
   .pipe(sass({
     outputStyle:'nested'
@@ -76,6 +76,7 @@ gulp.task('sass', function(){
 //  jade  ----------------------------------
 gulp.task('jade', function () {
   gulp.src([dir.src + '**/*.jade' , '!' + dir.src + '**/_includes/*'])
+    .pipe(changed( dir.dest ))
     .pipe(plumber())
     .pipe(jade({
       pretty: true
@@ -113,6 +114,7 @@ var typescriptProject = typescript.createProject({
 
 gulp.task('typescript', function(){
   gulp.src([dir.src + '**/*.ts'])
+    .pipe(changed( dir.dest ))
     .pipe(typescript(typescriptProject))
     .js
     .pipe(gulpif(JS_MIN, uglify()))

@@ -1,5 +1,6 @@
 var IS_MIN = false;
 var JS_MIN = true;
+var IS_LOCAL = true;
 
 var dir = {
   src  : 'src/',
@@ -11,6 +12,7 @@ var dir = {
 var gulp           = require('gulp');
 var mainBowerFiles = require('main-bower-files');
 var del            = require('del');
+var path           = require('path');
 var plumber        = require('gulp-plumber');
 var concat         = require('gulp-concat');
 var changed        = require('gulp-changed');
@@ -18,6 +20,7 @@ var gulpif         = require('gulp-if');
 var useref         = require('gulp-useref');
 var rename         = require('gulp-rename');
 var replace        = require('gulp-replace');
+var connect = require('gulp-connect');
 
 //js
 var typescript     = require('gulp-typescript');
@@ -25,6 +28,7 @@ var uglify         = require('gulp-uglify');
 
 //css
 var sass           = require('gulp-sass');
+var less           = require('gulp-less');
 var pleeease       = require('gulp-pleeease');
 
 //html
@@ -55,6 +59,23 @@ gulp.task('copy-static', function() {
     .pipe(gulp.dest(dir.dest));
 });
 
+gulp.task('less', function() {
+  gulp.src([dir.src + '**/*.less'])
+    .pipe(changed( dir.dest ))
+    .pipe(plumber())
+    .pipe(less({
+      paths: [ path.join(__dirname, 'less', 'includes') ]
+    }))
+    .pipe(pleeease({
+      autoprefixer: {
+          autoprefixer: ['last 4 versions']
+      },
+      minifier: IS_MIN
+    }))
+    .pipe(gulpif(!IS_MIN, replace(/  /g, '\t')))
+    .pipe(gulp.dest(dir.dest));
+});
+
 //  sass  ----------------------------------
 gulp.task('sass', function(){
   gulp.src([dir.src + '**/*.scss'])
@@ -70,7 +91,8 @@ gulp.task('sass', function(){
     minifier: IS_MIN
   }))
   .pipe(gulpif(!IS_MIN, replace(/  /g, '\t')))
-  .pipe(gulp.dest(dir.dest));
+  .pipe(gulp.dest(dir.dest))
+  .pipe(gulpif(IS_LOCAL, connect.reload()));
 });
 
 //  jade  ----------------------------------
@@ -82,7 +104,8 @@ gulp.task('jade', function () {
       pretty: true
     }))
     .pipe(replace(/  /g, '\t'))
-    .pipe(gulp.dest(dir.dest));
+    .pipe(gulp.dest(dir.dest))
+    .pipe(gulpif(IS_LOCAL, connect.reload()));
 });
 
 //image ----------------------------------
@@ -122,6 +145,16 @@ gulp.task('typescript', function(){
     .pipe(gulp.dest(dir.dest));
 });
 
+//- ----------------------------------------------------------- <
+gulp.task('connectDev',function(){
+  connect.server({
+    root: [dir.dest],   //ルートディレクトリ
+    port: 8000,     //ポート番号
+    livereload: true
+  });
+});
+
+
 // publishJS
 /*
 gulp.task('publishJS', function() {
@@ -134,6 +167,9 @@ gulp.task('publishJS', function() {
 //  watch  ----------------------------------
 gulp.task('watch', function () {
     gulp.watch(dir.src + '**/*.scss', ['sass']);
+    gulp.watch(dir.src + '**/*.less', ['less']);
     gulp.watch(dir.src + '**/*.jade', ['jade']);
     gulp.watch(dir.src + '**/*.ts', ['typescript']);
 });
+
+gulp.task('default',['watch','connectDev']);

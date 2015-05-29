@@ -1,13 +1,19 @@
+/* ===================================================================   <
+ *	gulp_settings made by Yasu MatsuMoto
+ * 	require gulp -g, typescript -g
+ ===================================================================   */
 var IS_MIN = false;
-var JS_MIN = true;
 
 var dir = {
   src  : 'src/',
   dest : 'release/'
 };
 
-// ##########################################################
-//core
+//- ----------------------------------------------------------- memo <
+// return gulp.src(dir.dest + '/d-navi/js/dn_*.js')
+// gulp-useref
+
+//- ===================================================================  importorts <
 var gulp           = require('gulp');
 var mainBowerFiles = require('main-bower-files');
 var del            = require('del');
@@ -16,13 +22,14 @@ var plumber        = require('gulp-plumber');
 var concat         = require('gulp-concat');
 var changed        = require('gulp-changed');
 var gulpif         = require('gulp-if');
-var useref         = require('gulp-useref');
 var rename         = require('gulp-rename');
 var replace        = require('gulp-replace');
 var browserSync    = require('browser-sync');
 
 //js
 var typescript     = require('gulp-typescript');
+var coffee         = require('gulp-coffee');
+var react          = require('gulp-react');
 var uglify         = require('gulp-uglify');
 
 //css
@@ -31,26 +38,27 @@ var less           = require('gulp-less');
 var pleeease       = require('gulp-pleeease');
 
 //html
-var jade        = require('gulp-jade');
+var jade           = require('gulp-jade');
 
 //image
-var imagemin    = require('gulp-imagemin');
-var pngquant    = require('imagemin-pngquant');
-var spritesmith = require('gulp.spritesmith');
+var imagemin       = require('gulp-imagemin');
+var pngquant       = require('imagemin-pngquant');
+var spritesmith    = require('gulp.spritesmith');
 
-
+//- ----------------------------------------------------------- makeLibs <
 gulp.task('bower', function() {
   gulp.src(mainBowerFiles({debugging:true, checkExistence:true}))
   .pipe(concat('libs.js'))
   .pipe(gulp.dest(dir.src + 'common/js'));
 });
 
-//  copy_defaut  ----------------------------------
-gulp.task('copy-static', function() {
+//- ----------------------------------------------------------- copy static files <
+gulp.task('copyStaticFiles', function() {
   gulp.src([dir.src + '**/*.css', dir.src + '**/*.inc', dir.src + '**/*.js', dir.src + '**/*.def', dir.src + '**/*.xml', dir.src + '**/*.mp4'])
     .pipe(gulp.dest(dir.dest));
 });
 
+//- ----------------------------------------------------------- less <
 gulp.task('less', function() {
   gulp.src([dir.src + '**/*.less'])
     .pipe(changed( dir.dest ))
@@ -69,7 +77,7 @@ gulp.task('less', function() {
     .pipe(browserSync.reload({stream: true}));
 });
 
-//  sass  ----------------------------------
+//- ----------------------------------------------------------- sass <
 gulp.task('sass', function(){
   gulp.src([dir.src + '**/*.scss'])
   .pipe(changed( dir.dest ))
@@ -92,7 +100,7 @@ gulp.task('sass', function(){
   .pipe(browserSync.reload({stream: true}));
 });
 
-//  jade  ----------------------------------
+//- ----------------------------------------------------------- jade <
 gulp.task('jade', function () {
   gulp.src([dir.src + '**/*.jade' , '!' + dir.src + '**/_includes/*'])
     .pipe(changed( dir.dest ))
@@ -105,83 +113,92 @@ gulp.task('jade', function () {
     .pipe(browserSync.reload({stream: true}));
 });
 
-//image ----------------------------------
-gulp.task( 'imagemin', function(){
-  var srcGlob = dir.src + '/**/*.+(jpg|jpeg|png|gif|svg)';
+//- ----------------------------------------------------------- image optimize <
+gulp.task('optimizeImage', function(){
+  var srcGlob = dir.src + '**/*.+(jpg|jpeg|png|gif|svg)';
   var imageminOptions = {
-    optimizationLevel: 3,
+    optimizationLevel: 1,
     use: [pngquant({
-      quality: 60-75,
+      quality: 90-100,
       speed: 1
     })]
   };
 
-  gulp.src( dir.src + '/**/*.+(jpg|jpeg|png|gif|svg)' )
+  gulp.src( dir.src + '**/*.+(jpg|jpeg|png|gif|svg)' )
     .pipe(changed( dir.dest ))
     .pipe(imagemin(imageminOptions))
     .pipe(gulp.dest( dir.dest ));
 });
 
-gulp.task('sprite', function () {
-  var _source = dir.src + '/twc/info/super/img/utils/';
-  var _imgOutput = dir.src + '/twc/info/super/img/sprites/';
-  var _scssOutput = dir.src + '/twc/info/super/css/';
+//- ----------------------------------------------------------- css sprite <
+gulp.task('makeSprite', function () {
+  var _source     = dir.src + 'img/';
+  var _imgOutput  = dir.src + 'img/spr/';
+  var _scssOutput = dir.src + 'css/';
 
-  var spriteData = gulp.src(_source + '*.png') //スプライトにする愉快な画像達
+  var spriteData = gulp.src(_source + '*.png')
   .pipe(spritesmith({
-    imgName: 'sprite.png', //スプライトの画像
-    cssName: '_sprite.scss', //生成されるscss
-    imgPath: '../img/sprites/sprite.png', //生成されるscssに記載されるパス
-    cssFormat: 'scss', //フォーマット
-    padding : 10,
+    imgName  : 'spr.png',
+    cssName  : '_sprite.scss',
+    imgPath  : '../img/spr/spr.png', //生成されるscssに記載されるパス
+    cssFormat: 'scss',
+    padding  : 10,
     cssVarMap: function (sprite) {
-      sprite.name = sprite.name; //VarMap(生成されるScssにいろいろな変数の一覧を生成)
+      sprite.name = sprite.name;
     },
     cssOpts: {
       functions: false
     }
   }));
-  spriteData.img.pipe(gulp.dest(_imgOutput)); //imgNameで指定したスプライト画像の保存先
-  spriteData.css.pipe(gulp.dest(_scssOutput)); //cssNameで指定したcssの保存先
+  spriteData.img.pipe(gulp.dest(_imgOutput));
+  spriteData.css.pipe(gulp.dest(_scssOutput));
 });
 
-//  js  ----------------------------------
+//- ----------------------------------------------------------- typescript <
 var typescriptProject = typescript.createProject({
-  target         : "ES5",
+  target         : 'ES5',
   removeComments : true,
   sortOutput     : true,
   noImplicitAny  : false,
   noEmitOnError  : false,
-  module         :"commonjs",
-  typescript: require('typescript')
+  module         : 'commonjs',
+  typescript     : require('typescript')
 });
 
 gulp.task('typescript', function(){
   gulp.src([dir.src + '**/*.ts'])
     .pipe(changed( dir.dest ))
+    .pipe(plumber())
     .pipe(typescript(typescriptProject))
     .js
-    .pipe(gulpif(JS_MIN, uglify()))
-    .pipe(gulpif(!JS_MIN, replace(/    /g, '\t')))
+    .pipe(gulpif(IS_MIN, uglify()))
+    .pipe(gulpif(!IS_MIN, replace(/    /g, '\t')))
     .pipe(gulp.dest(dir.dest))
-    .pipe(gulpif(IS_LOCAL, browserSync.reload({stream: true})));
+    .pipe(browserSync.reload({stream: true}));
 });
 
-gulp.task('bs-reload', function () {
-  browserSync.reload();
+//- ----------------------------------------------------------- coffieScript <
+gulp.task('coffeeScript', function(){
+  gulp.src([dir.src + '**/*.coffee'])
+  .pipe(changed( dir.dest ))
+  .pipe(plumber())
+  .pipe(coffee())
+  .pipe(gulpif(IS_MIN, uglify()))
+  .pipe(gulpif(!IS_MIN, replace(/\n\n/g, '\n')))
+  .pipe(gulp.dest(dir.dest))
+  .pipe(browserSync.reload({stream: true}));
 });
 
-
-// publishJS
-/*
-gulp.task('publishJS', function() {
-  return gulp.src(dir.dest + '/d-navi/js/dn_*.js')
-  .pipe(concat('dn.min.js'))
-  .pipe(gulp.dest(dir.dest + '/d-navi/js'));
+//- ----------------------------------------------------------- jsx <
+gulp.task('jsx', function () {
+  gulp.src([dir.src + '**/*.jsx'])
+    .pipe(react())
+    .pipe(gulpif(IS_MIN, uglify()))
+    .pipe(gulp.dest(dir.dest))
+    .pipe(browserSync.reload({stream: true}));
 });
-*/
 
-//  watch  ----------------------------------
+//- ----------------------------------------------------------- watch <
 gulp.task('watch', function () {
     browserSync({
       server: {
@@ -192,4 +209,6 @@ gulp.task('watch', function () {
     gulp.watch(dir.src + '**/*.less', ['less']);
     gulp.watch(dir.src + '**/*.jade', ['jade']);
     gulp.watch(dir.src + '**/*.ts', ['typescript']);
+    gulp.watch(dir.src + '**/*.coffee', ['coffee']);
+    gulp.watch(dir.src + '**/*.jsx', ['jsx']);
 });

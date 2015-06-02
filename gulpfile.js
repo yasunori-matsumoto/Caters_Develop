@@ -67,8 +67,8 @@ gulp.task('less', function() {
       paths: [ path.join(__dirname, 'less', 'includes') ]
     }))
     .pipe(pleeease({
-      autoprefixer: {
-          autoprefixer: ['last 4 versions']
+      autoprefixer : {
+          browsers : ['last 4 versions', 'Firefox >= 2', 'Opera 12.1', 'ios 6']
       },
       minifier: IS_MIN
     }))
@@ -89,8 +89,8 @@ gulp.task('sass', function(){
     // outputStyle:'compressed'
   }))
   .pipe(pleeease({
-    autoprefixer: {
-        autoprefixer: ['last 4 versions']
+    autoprefixer : {
+        browsers : ['last 4 versions', 'Firefox >= 2', 'Opera 12.1', 'ios 6']
     },
     minifier: IS_MIN
   }))
@@ -140,7 +140,7 @@ gulp.task('makeSprite', function () {
   .pipe(spritesmith({
     imgName  : 'spr.png',
     cssName  : '_sprite.scss',
-    imgPath  : '../img/spr/spr.png', //生成されるscssに記載されるパス
+    imgPath  : '../img/spr/spr.png',
     cssFormat: 'scss',
     padding  : 10,
     cssVarMap: function (sprite) {

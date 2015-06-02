@@ -26,25 +26,27 @@ var rename         = require('gulp-rename');
 var replace        = require('gulp-replace');
 var browserSync    = require('browser-sync');
 
-//js
+//- . . . . . . . . . . . . . . .  . . . js <
 var typescript     = require('gulp-typescript');
 var coffee         = require('gulp-coffee');
 var react          = require('gulp-react');
 var uglify         = require('gulp-uglify');
 
-//css
+//- . . . . . . . . . . . . . . .  . . . css <
 var sass           = require('gulp-sass');
 var less           = require('gulp-less');
 var pleeease       = require('gulp-pleeease');
 var cssmin         = require('gulp-minify-css');
+var csscomb        = require('gulp-csscomb');
 
-//html
+//- . . . . . . . . . . . . . . .  . . . html <
 var jade           = require('gulp-jade');
 
-//image
+//- . . . . . . . . . . . . . . .  . . . image <
 var imagemin       = require('gulp-imagemin');
 var pngquant       = require('imagemin-pngquant');
 var spritesmith    = require('gulp.spritesmith');
+
 
 //- ----------------------------------------------------------- makeLibs <
 gulp.task('bower', function() {
@@ -69,11 +71,12 @@ gulp.task('less', function() {
     }))
     .pipe(pleeease({
       autoprefixer : {
-          browsers : ['last 4 versions','ie 8', 'ie 9', 'Firefox >= 2', 'Opera 12.1', 'ios 6', 'android 4']
+          browsers : ['last 4 versions', 'Explorer >= 8', 'Firefox >= 24', 'Opera 12.1', 'ios 6', 'android 4']
       },
       minifier: IS_MIN
     }))
     .pipe(gulpif(!IS_MIN, replace(/  /g, '\t')))
+    .pipe(csscomb())
     .pipe(gulpif(IS_MIN, cssmin({compatibility: 'ie8'})))
     .pipe(gulpif(IS_MIN, rename({suffix:'.min'})))
     .pipe(gulp.dest(dir.dest))
@@ -98,6 +101,7 @@ gulp.task('sass', function(){
   }))
   .pipe(gulpif(!IS_MIN, replace(/\n\n/g, '\n')))
   .pipe(gulpif(!IS_MIN, replace(/  /g, '\t')))
+  .pipe(csscomb())
   .pipe(gulpif(IS_MIN, cssmin({compatibility: 'ie8'})))
   .pipe(gulpif(IS_MIN, rename({suffix:'.min'})))
   .pipe(gulp.dest(dir.dest))

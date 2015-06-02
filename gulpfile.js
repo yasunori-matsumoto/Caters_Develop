@@ -2,7 +2,7 @@
  *	gulp_settings made by Yasu MatsuMoto
  * 	require gulp -g, typescript -g
  ===================================================================   */
-var IS_MIN = false;
+var IS_MIN = true;
 
 var dir = {
   src  : 'src/',
@@ -36,6 +36,7 @@ var uglify         = require('gulp-uglify');
 var sass           = require('gulp-sass');
 var less           = require('gulp-less');
 var pleeease       = require('gulp-pleeease');
+var cssmin         = require('gulp-minify-css');
 
 //html
 var jade           = require('gulp-jade');
@@ -68,11 +69,13 @@ gulp.task('less', function() {
     }))
     .pipe(pleeease({
       autoprefixer : {
-          browsers : ['last 4 versions', 'Firefox >= 2', 'Opera 12.1', 'ios 6']
+          browsers : ['last 4 versions','ie 8', 'ie 9', 'Firefox >= 2', 'Opera 12.1', 'ios 6', 'android 4']
       },
       minifier: IS_MIN
     }))
     .pipe(gulpif(!IS_MIN, replace(/  /g, '\t')))
+    .pipe(gulpif(IS_MIN, cssmin({compatibility: 'ie8'})))
+    .pipe(gulpif(IS_MIN, rename({suffix:'.min'})))
     .pipe(gulp.dest(dir.dest))
     .pipe(browserSync.reload({stream: true}));
 });
@@ -90,19 +93,20 @@ gulp.task('sass', function(){
   }))
   .pipe(pleeease({
     autoprefixer : {
-        browsers : ['last 4 versions', 'Firefox >= 2', 'Opera 12.1', 'ios 6']
+        browsers : ['last 4 versions','ie 8', 'ie 9', 'Firefox >= 2', 'Opera 12.1', 'ios 6', 'android 4']
     },
-    minifier: IS_MIN
   }))
   .pipe(gulpif(!IS_MIN, replace(/\n\n/g, '\n')))
   .pipe(gulpif(!IS_MIN, replace(/  /g, '\t')))
+  .pipe(gulpif(IS_MIN, cssmin({compatibility: 'ie8'})))
+  .pipe(gulpif(IS_MIN, rename({suffix:'.min'})))
   .pipe(gulp.dest(dir.dest))
   .pipe(browserSync.reload({stream: true}));
 });
 
 //- ----------------------------------------------------------- jade <
 gulp.task('jade', function () {
-  gulp.src([dir.src + '**/*.jade' , '!' + dir.src + '**/_includes/*'])
+  gulp.src([dir.src + '**/*.jade' , '!' + dir.src + '**/_templates/*'])
     .pipe(changed( dir.dest ))
     .pipe(plumber())
     .pipe(jade({
@@ -173,6 +177,9 @@ gulp.task('typescript', function(){
     .js
     .pipe(gulpif(IS_MIN, uglify()))
     .pipe(gulpif(!IS_MIN, replace(/    /g, '\t')))
+    .pipe(
+      gulpif(IS_MIN, rename({suffix:'.min'}))
+    )
     .pipe(gulp.dest(dir.dest))
     .pipe(browserSync.reload({stream: true}));
 });
@@ -185,6 +192,9 @@ gulp.task('coffeeScript', function(){
   .pipe(coffee())
   .pipe(gulpif(IS_MIN, uglify()))
   .pipe(gulpif(!IS_MIN, replace(/\n\n/g, '\n')))
+  .pipe(
+    gulpif(IS_MIN, rename({suffix:'.min'}))
+  )
   .pipe(gulp.dest(dir.dest))
   .pipe(browserSync.reload({stream: true}));
 });
@@ -194,6 +204,9 @@ gulp.task('jsx', function () {
   gulp.src([dir.src + '**/*.jsx'])
     .pipe(react())
     .pipe(gulpif(IS_MIN, uglify()))
+    .pipe(
+      gulpif(IS_MIN, rename({suffix:'.min'}))
+    )
     .pipe(gulp.dest(dir.dest))
     .pipe(browserSync.reload({stream: true}));
 });

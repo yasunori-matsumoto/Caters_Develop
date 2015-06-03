@@ -1,17 +1,18 @@
 /* ===================================================================   <
- *	gulp_settings made by Yasu MatsuMoto
- * 	require gulp -g, typescript -g
+ *	gulp_settings by Yasu MatsuMoto
+ * 	require gulp -g, typescript -g, stylus -g
  ===================================================================   */
-var IS_MIN = false;
+var IS_MIN      = false;
+var IS_HARDCASE = false;
 
 var dir = {
-  src  : 'src/',
-  dest : 'release/'
-};
+  // src  : 'src/',
+  // dest : 'release/special/styling/',
+  src  : 'src/sp/',
+  dest : 'release/special/styling/sp/',
 
-//- ----------------------------------------------------------- memo <
-// return gulp.src(dir.dest + '/d-navi/js/dn_*.js')
-// gulp-useref
+  root : 'release/'
+};
 
 //- ===================================================================  importorts <
 var gulp           = require('gulp');
@@ -33,8 +34,9 @@ var react          = require('gulp-react');
 var uglify         = require('gulp-uglify');
 
 //- . . . . . . . . . . . . . . . . . . css <
-var sass           = require('gulp-sass');
 var less           = require('gulp-less');
+var sass           = require('gulp-sass');
+var stylus         = require('gulp-stylus');
 var pleeease       = require('gulp-pleeease');
 var cssmin         = require('gulp-minify-css');
 var csscomb        = require('gulp-csscomb');
@@ -51,52 +53,42 @@ var pngquant       = require('imagemin-pngquant');
 
 //- ----------------------------------------------------------- makeLibs <
 gulp.task('bower', function() {
-  gulp.src(mainBowerFiles({debugging:true, checkExistence:true}))
+  gulp.src(mainBowerFiles({debugging : true, checkExistence : true}))
   .pipe(concat('libs.js'))
-  .pipe(gulp.dest(dir.src + 'common/js'));
+  .pipe(gulp.dest(dir.src + 'assets/js'));
 });
 
 //- ----------------------------------------------------------- copy static files <
 gulp.task('copyStaticFiles', function() {
   gulp.src([dir.src + '**/*.css', dir.src + '**/*.inc', dir.src + '**/*.js', dir.src + '**/*.def', dir.src + '**/*.xml', dir.src + '**/*.mp4'])
+    .pipe(changed( dir.dest ))
     .pipe(gulp.dest(dir.dest));
 });
 
-//- ----------------------------------------------------------- less <
-gulp.task('less', function() {
-  gulp.src([dir.src + '**/*.less'])
-    .pipe(changed( dir.dest ))
-    .pipe(plumber())
-    .pipe(less({
-      paths: [ path.join(__dirname, 'less', 'includes') ]
-    }))
-    .pipe(pleeease({
-      autoprefixer : {
-        browsers : ['last 4 versions', 'Explorer >= 8', 'Firefox >= 24', 'Opera 12.1', 'ios 6', 'android 4']
-      },
-      minifier: IS_MIN
-    }))
-    .pipe(shorthand())
-    .pipe(gulpif(!IS_MIN, csscomb()))
-    .pipe(gulpif(!IS_MIN, replace(/\n\n/g, '\n')))
-    .pipe(gulpif(!IS_MIN, replace(/  /g, '\t')))
-    .pipe(gulpif(IS_MIN, cssmin({compatibility: 'ie8'})))
-    .pipe(gulpif(IS_MIN, rename({suffix:'.min'})))
-    .pipe(gulp.dest(dir.dest))
-    .pipe(browserSync.reload({stream: true}));
-});
 
-//- ----------------------------------------------------------- sass <
-gulp.task('sass', function(){
-  gulp.src([dir.src + '**/*.scss'])
+//- ########################################################################  stylesheets <
+gulp.task('stylesheets', function(){
+  gulp.src([dir.src + '**/*.scss', dir.src + '**/*.less', dir.src + '**/*.styl'])
   .pipe(changed( dir.dest ))
   .pipe(plumber())
-  .pipe(sass({
-    // outputStyle:'nested'
-    // outputStyle:'expanded'
-    outputStyle:'compact'
-    // outputStyle:'compressed'
-  }))
+  //- ----------------------------------------------------------- sass <
+  .pipe(gulpif(/[.]scss$/, sass({
+        // outputStyle:'nested'
+        // outputStyle:'expanded'
+        outputStyle:'compact'
+        // outputStyle:'compressed'
+      })
+    )
+  )
+  //- ----------------------------------------------------------- less <
+  .pipe(gulpif(/[.]less$/, less({
+        paths: [ path.join(__dirname, 'less', 'includes') ]
+      })
+    )
+  )
+  //- ----------------------------------------------------------- styls <
+  .pipe(gulpif(/[.]styl$/, stylus()))
+  //- ===================================================================  utils <
   .pipe(pleeease({
     autoprefixer : {
       browsers : ['last 4 versions','ie 8', 'ie 9', 'Firefox >= 2', 'Opera 12.1', 'ios 6', 'android 4']
@@ -106,12 +98,13 @@ gulp.task('sass', function(){
   .pipe(shorthand())
   .pipe(gulpif(!IS_MIN, csscomb()))
   .pipe(gulpif(!IS_MIN, replace(/\n\n/g, '\n')))
-  .pipe(gulpif(!IS_MIN, replace(/  /g, '\t')))
+  .pipe(gulpif(IS_HARDCASE, replace(/    /g, '\t')))
   .pipe(gulpif(IS_MIN, cssmin({compatibility: 'ie8'})))
   .pipe(gulpif(IS_MIN, rename({suffix:'.min'})))
   .pipe(gulp.dest(dir.dest))
   .pipe(browserSync.reload({stream: true}));
 });
+
 
 //- ----------------------------------------------------------- jade <
 gulp.task('jade', function () {
@@ -121,7 +114,7 @@ gulp.task('jade', function () {
     .pipe(jade({
       pretty: true
     }))
-    .pipe(replace(/  /g, '\t'))
+    .pipe(gulpif(IS_HARDCASE, replace(/    /g, '\t')))
     .pipe(gulp.dest(dir.dest))
     .pipe(browserSync.reload({stream: true}));
 });
@@ -185,7 +178,6 @@ gulp.task('typescript', function(){
     .pipe(typescript(typescriptProject))
     .js
     .pipe(gulpif(IS_MIN, uglify()))
-    .pipe(gulpif(!IS_MIN, replace(/    /g, '\t')))
     .pipe(gulpif(IS_MIN, rename({suffix:'.min'})))
     .pipe(gulp.dest(dir.dest))
     .pipe(browserSync.reload({stream: true}));
@@ -215,15 +207,17 @@ gulp.task('jsx', function () {
 });
 
 //- ----------------------------------------------------------- watch <
-gulp.task('watch', function () {
+gulp.task('watch', ['copyStaticFiles'], function () {
     browserSync({
       server: {
-        baseDir: dir.dest
-      }
+        baseDir: dir.root
+      },
+      startPath : dir.dest
     });
-    gulp.watch(dir.src + '**/*.scss', ['sass']);
-    gulp.watch(dir.src + '**/*.less', ['less']);
     gulp.watch(dir.src + '**/*.jade', ['jade']);
+    gulp.watch(dir.src + '**/*.less', ['stylesheets']);
+    gulp.watch(dir.src + '**/*.scss', ['stylesheets']);
+    gulp.watch(dir.src + '**/*.styl', ['stylesheets']);
     gulp.watch(dir.src + '**/*.ts', ['typescript']);
     gulp.watch(dir.src + '**/*.coffee', ['coffee']);
     gulp.watch(dir.src + '**/*.jsx', ['jsx']);

@@ -6,12 +6,12 @@ var IS_MIN      = false;
 var IS_HARDCASE = false;
 
 var dir = {
-  // src  : 'src/',
-  // dest : 'release/special/styling/',
-  src  : 'src/sp/',
-  dest : 'release/special/styling/sp/',
+  src  : 'src/',
+  dest : 'build/special/styling/',
+  //-  src  : 'src/sp/',
+  //-  dest : 'build/special/styling/sp/',
 
-  root : 'release/'
+  root : 'build/'
 };
 
 //- ===================================================================  importorts <
@@ -37,6 +37,7 @@ var uglify         = require('gulp-uglify');
 var less           = require('gulp-less');
 var sass           = require('gulp-sass');
 var stylus         = require('gulp-stylus');
+var nib            = require('nib');
 var pleeease       = require('gulp-pleeease');
 var cssmin         = require('gulp-minify-css');
 var csscomb        = require('gulp-csscomb');
@@ -60,7 +61,7 @@ gulp.task('bower', function() {
 
 //- ----------------------------------------------------------- copy static files <
 gulp.task('copyStaticFiles', function() {
-  gulp.src([dir.src + '**/*.css', dir.src + '**/*.inc', dir.src + '**/*.js', dir.src + '**/*.def', dir.src + '**/*.xml', dir.src + '**/*.mp4'])
+  gulp.src( dir.src + '**/*.+(css|js|def|xml|mp4|json|zip|inc)')
     .pipe(changed( dir.dest ))
     .pipe(gulp.dest(dir.dest));
 });
@@ -68,7 +69,7 @@ gulp.task('copyStaticFiles', function() {
 
 //- ########################################################################  stylesheets <
 gulp.task('stylesheets', function(){
-  gulp.src([dir.src + '**/*.scss', dir.src + '**/*.less', dir.src + '**/*.styl'])
+  gulp.src( dir.src + '**/*.+(scss|styl|less|)')
   .pipe(changed( dir.dest ))
   .pipe(plumber())
   //- ----------------------------------------------------------- sass <
@@ -87,7 +88,7 @@ gulp.task('stylesheets', function(){
     )
   )
   //- ----------------------------------------------------------- styls <
-  .pipe(gulpif(/[.]styl$/, stylus()))
+  .pipe(gulpif(/[.]styl$/, stylus({use: nib()})))
   //- ===================================================================  utils <
   .pipe(pleeease({
     autoprefixer : {
@@ -145,9 +146,10 @@ gulp.task('makeSprite', function () {
   var spriteData = gulp.src(_source + '*.png')
   .pipe(spritesmith({
     imgName  : 'spr.png',
-    cssName  : '_sprite.scss',
+    cssName  : '_sprite.styl',
     imgPath  : '../img/spr/spr.png',
-    cssFormat: 'scss',
+    cssFormat: 'stylus',
+    //-  cssFormat: 'scss',
     padding  : 10,
     cssVarMap: function (sprite) {
       sprite.name = sprite.name;

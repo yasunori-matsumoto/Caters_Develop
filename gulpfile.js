@@ -2,7 +2,7 @@
  *	gulp_settings by Yasu MatsuMoto
  * 	require gulp -g, typescript -g, stylus -g
  ===================================================================   */
-var IS_MIN      = false;
+var IS_MIN      = true;
 var IS_HARDCASE = false;
 
 var dir = {
@@ -10,7 +10,6 @@ var dir = {
   dest : 'build/special/styling/',
   //-  src  : 'src/sp/',
   //-  dest : 'build/special/styling/sp/',
-
   root : 'build/'
 };
 
@@ -38,13 +37,15 @@ var less           = require('gulp-less');
 var sass           = require('gulp-sass');
 var stylus         = require('gulp-stylus');
 var nib            = require('nib');
-var pleeease       = require('gulp-pleeease');
-var cssmin         = require('gulp-minify-css');
+
 var csscomb        = require('gulp-csscomb');
 var shorthand      = require('gulp-shorthand');
+var pleeease       = require('gulp-pleeease');
+var cssmin         = require('gulp-minify-css');
 
 //- . . . . . . . . . . . . . . . . . . html <
 var jade           = require('gulp-jade');
+var htmlmin        = require('gulp-htmlmin');
 
 //- . . . . . . . . . . . . . . . . . . image <
 var imagemin       = require('gulp-imagemin');
@@ -66,18 +67,14 @@ gulp.task('copyStaticFiles', function() {
     .pipe(gulp.dest(dir.dest));
 });
 
-
-//- ########################################################################  stylesheets <
+//- ===================================================================  stylesheets <
 gulp.task('stylesheets', function(){
   gulp.src( dir.src + '**/*.+(scss|styl|less|)')
   .pipe(changed( dir.dest ))
   .pipe(plumber())
   //- ----------------------------------------------------------- sass <
   .pipe(gulpif(/[.]scss$/, sass({
-        // outputStyle:'nested'
-        // outputStyle:'expanded'
-        outputStyle:'compact'
-        // outputStyle:'compressed'
+        outputStyle:'compact' //-  nested, expanded, compact, compressed
       })
     )
   )
@@ -88,19 +85,25 @@ gulp.task('stylesheets', function(){
     )
   )
   //- ----------------------------------------------------------- styls <
-  .pipe(gulpif(/[.]styl$/, stylus({use: nib()})))
-  //- ===================================================================  utils <
+  .pipe(gulpif(/[.]styl$/, stylus({
+        use: nib(),
+        linenos: false, //-  line_comments
+        compress: true
+      })
+    )
+  )
+  //- -----------------------------------------------------------  utils <
   .pipe(pleeease({
     autoprefixer : {
       browsers : ['last 4 versions','ie 8', 'ie 9', 'Firefox >= 2', 'Opera 12.1', 'ios 6', 'android 4']
     },
     minifier: IS_MIN
   }))
-  .pipe(shorthand())
-  .pipe(gulpif(!IS_MIN, csscomb()))
+  .pipe(gulpif(IS_MIN, shorthand()))
+  .pipe(csscomb())
   .pipe(gulpif(!IS_MIN, replace(/\n\n/g, '\n')))
   .pipe(gulpif(IS_HARDCASE, replace(/    /g, '\t')))
-  .pipe(gulpif(IS_MIN, cssmin({compatibility: 'ie8'})))
+  .pipe(gulpif(IS_MIN, cssmin({compatibility: 'ie8', keepBreaks:true})))
   .pipe(gulpif(IS_MIN, rename({suffix:'.min'})))
   .pipe(gulp.dest(dir.dest))
   .pipe(browserSync.reload({stream: true}));
@@ -108,6 +111,14 @@ gulp.task('stylesheets', function(){
 
 
 //- ----------------------------------------------------------- jade <
+var _htmlOption = {
+  removeComments                : true,
+  collapseWhitespace            : false,
+  removeEmptyAttributes         : true,
+  removeScriptTypeAttributes    : true, //- text/javascript
+  removeStyleLinkTypeAttributes : true //- stylesheet
+};
+
 gulp.task('jade', function () {
   gulp.src([dir.src + '**/*.jade' , '!' + dir.src + '**/_templates/*'])
     .pipe(changed( dir.dest ))
@@ -115,6 +126,7 @@ gulp.task('jade', function () {
     .pipe(jade({
       pretty: true
     }))
+    .pipe(gulpif(IS_MIN, htmlmin(_htmlOption)))
     .pipe(gulpif(IS_HARDCASE, replace(/    /g, '\t')))
     .pipe(gulp.dest(dir.dest))
     .pipe(browserSync.reload({stream: true}));
@@ -148,8 +160,7 @@ gulp.task('makeSprite', function () {
     imgName  : 'spr.png',
     cssName  : '_sprite.styl',
     imgPath  : '../img/spr/spr.png',
-    cssFormat: 'stylus',
-    //-  cssFormat: 'scss',
+    cssFormat: 'stylus',  //-  scss, stylus
     padding  : 10,
     cssVarMap: function (sprite) {
       sprite.name = sprite.name;
@@ -202,6 +213,15 @@ gulp.task('coffeeScript', function(){
 gulp.task('jsx', function () {
   gulp.src([dir.src + '**/*.jsx'])
     .pipe(react())
+    .pipe(gulpif(IS_MIN, uglify()))
+    .pipe(gulpif(IS_MIN, rename({suffix:'.min'})))
+    .pipe(gulp.dest(dir.dest))
+    .pipe(browserSync.reload({stream: true}));
+});
+
+//- ----------------------------------------------------------- js(raw) <
+gulp.task('js-raw', function () {
+  gulp.src([dir.src + '**/*.js'])
     .pipe(gulpif(IS_MIN, uglify()))
     .pipe(gulpif(IS_MIN, rename({suffix:'.min'})))
     .pipe(gulp.dest(dir.dest))

@@ -14,11 +14,15 @@
     "tests"
   ],
   "dependencies": {
-    "velocity": "~1.2.2"
+    "velocity": "~1.2.2",
+    "fastclick": "~1.0.6",
+    "lodash": "~3.10.1",
+    "jScrollPane": "jscrollpane#~2.0.22"
   },
   "devDependencies": {
-    "velocity": "~1.2.2",
-    "fastclick": "~1.0.6"
+    "lodash": "~3.10.1",
+    "pixi.js": "pixi#~3.0.7",
+    "jScrollPane": "jscrollpane#~2.0.22"
   },
   "homepage": "",
   "overrides": {

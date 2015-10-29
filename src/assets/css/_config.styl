@@ -1,0 +1,269 @@
+pc_view_width = 980px
+sp_w_ratio = 640px
+pc_w_ratio = 641px
+
+base_scale = 1
+sp_scale = 2
+z_upper = 3000
+
+base_font_size = 10
+
+col_text  = #262626
+col_white = #fff
+col_black = #000
+col_red   = #d12a2a
+
+//- ===================================================================  mixin <
+yu()
+  font-family Helvetica, Arial, "YuGothic", "Yu Gothic", "游ゴシック", "游ゴシック体", "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic Pro", Meiryo, "メイリオ", "ＭＳ Ｐゴシック", sans-serif
+
+roboto()
+  font-family 'Roboto', sans-serif
+  font-weight 100
+  font-style italic
+
+dot()
+  position relative
+  &:before
+    content ''
+    width 100%
+    height 6px
+    background-image url(../img/bg_dot.png)
+    position absolute
+    left 0
+    top 0
+    z-index 3
+    
+dot_l()
+  position relative
+  &:before
+    content ''
+    width 100%
+    height 6px
+    background-image url(../img/bg_dot.png)
+    position absolute
+    left 0
+    top 0
+    z-index 3
+    opacity 0.5
+
+dot_s()
+  position relative
+  &:before
+    background-size 2px 2px
+    content ''
+    width 100%
+    height 4px
+    background-image url(../img/dot_ptn.png)
+    position absolute
+    left 0
+    top 0
+    opacity 0.4
+    z-index 3
+
+spritebtn()
+  a
+    width 100%
+    height 100%
+    position absolute
+    left 0
+    top 0
+    text-indent -9999px
+
+spr_elem()
+  position relative
+  spritebtn()
+  overflow hidden
+
+
+
+w(n)
+  width unit(n / base_scale , 'px')
+
+h(n)
+  height unit(n / base_scale , 'px')
+
+fz(n)
+  font-size unit(n / base_scale , 'px')
+
+fzrem(n)
+  font-size unit(n/base_font_size, 'rem')
+  
+fz2(n)
+  font-size unit(n/base_font_size/sp_scale, 'rem')
+
+fzs(n)
+  font-size unit(n/base_font_size/sp_scale, 'rem')
+  
+  
+//- . . . . . . . . . . . . . . .  . . . sp <
+w2(n)
+  width unit(n / sp_scale , 'px')
+
+h2(n)
+  height unit(n / sp_scale , 'px')
+
+mh2(n)
+  min-height unit(n / sp_scale , 'px')
+  
+lh2(n)
+  line-height unit(n / sp_scale , 'px')
+
+//- . . . . . . . . . . . . . . .  . . . margin <
+mt(n)
+  margin-top unit(n / base_scale , 'px')
+
+ml(n)
+  margin-left unit(n / base_scale , 'px')
+
+mr(n)
+  margin-right unit(n / base_scale , 'px')
+  
+mb(n)
+  margin-bottom unit(n / base_scale , 'px')
+
+mmt(n)
+  margin-top unit(-1*n/2/base_scale , 'px')
+
+mml(n)
+  margin-left unit(-1*n/2/base_scale , 'px')
+
+//- . . . . . . . . . . . . . . .  . . . sp <
+mt2(n)
+  margin-top unit(n / sp_scale , 'px')
+
+ml2(n)
+  margin-left unit(n / sp_scale , 'px')
+
+mr2(n)
+  margin-right unit(n / sp_scale , 'px')
+  
+mb2(n)
+  margin-bottom unit(n / sp_scale , 'px')
+
+mmt2(n)
+  margin-top unit(-1*n/2/sp_scale , 'px')
+
+mml2(n)
+  margin-left unit(n/2/sp_scale , 'px')
+
+//- . . . . . . . . . . . . . . .  . . . padding <
+pd(n)
+  padding unit(n / base_scale , 'px')
+  
+pt(n)
+  padding-top unit(n / base_scale , 'px')
+
+pl(n)
+  padding-left unit(n / base_scale , 'px')
+
+pr(n)
+  padding-right unit(n / base_scale , 'px')
+  
+pb(n)
+  padding-bottom unit(n / base_scale , 'px')
+
+//- . . . . . . . . . . . . . . .  . . . sp <
+pd2(n)
+  padding unit(n / sp_scale , 'px')
+  
+pt2(n)
+  padding-top unit(n / sp_scale , 'px')
+
+pl2(n)
+  padding-left unit(n / sp_scale , 'px')
+
+pr2(n)
+  padding-right unit(n / sp_scale , 'px')
+  
+pb2(n)
+  padding-bottom unit(n / sp_scale , 'px')
+
+poa(x, y)
+  position absolute
+  left unit(x / base_scale, 'px')
+  top unit(y / base_scale, 'px')
+poa2(x, y)
+  position absolute
+  left unit(x / sp_scale, 'px')
+  top unit(y / sp_scale, 'px')
+  
+pof(x, y)
+  position fixed
+  left unit(x / base_scale, 'px')
+  top unit(y / base_scale, 'px')
+  
+poc(x, y)
+  position absolute
+  left 50%
+  top unit(y / base_scale, 'px')
+  margin-left unit(x/ base_scale, 'px')
+
+bc()
+  margin 0 auto
+
+//- ===================================================================  sprites <
+cssScale($x)
+  $x / base_scale
+
+spriteWidth($sprite) {
+  width cssScale($sprite[4]);
+}
+
+spriteHeight($sprite) {
+  height $sprite[5];
+  text-indent -999px
+}
+
+spritePosition($sprite) {
+  background-position cssScale($sprite[2]) cssScale($sprite[3]);
+}
+
+spriteImage($sprite) {
+  background-image url($sprite[8]);
+}
+
+spriteSize($sprite) {
+  background-size cssScale($sprite[6]) cssScale($sprite[7])
+}
+
+sprite($sprite) {
+  spr_elem()
+  spriteSize($sprite)
+  spriteImage($sprite)
+  spritePosition($sprite)
+  spriteWidth($sprite)
+  spriteHeight($sprite)
+  background-repeat no-repeat
+}
+
+//- ===================================================================  sp_sprites <
+cssScale2($x)
+  ceil($x / sp_scale);
+
+spriteWidth2($sprite) {
+  width cssScale2($sprite[4])+1;
+}
+
+spriteHeight2($sprite) {
+  height 0px;
+  padding-top cssScale2($sprite[5]+2)
+}
+
+spritePosition2($sprite) {
+  background-position cssScale2($sprite[2]) cssScale2($sprite[3]+1);
+}
+
+spriteSize2($sprite) {
+  background-size cssScale2($sprite[6]) cssScale2($sprite[7])
+}
+
+sprite2($sprite) {
+  spr_elem()
+  spriteSize2($sprite)
+  spriteImage($sprite)
+  spritePosition2($sprite)
+  spriteWidth2($sprite)
+  spriteHeight2($sprite)
+  background-repeat no-repeat
+}

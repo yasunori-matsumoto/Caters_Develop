@@ -6,7 +6,7 @@ var IS_MIN      = true;
 var IS_HARDCASE = true;
 var _isPC       = true;
 
-var _src  = _isPC ? 'src/pc/' : 'src/sp/';
+var _src  = _isPC ? 'src/' : 'src/sp/';
 var _dest = _isPC ? '_git/public_html/' : '_git/public_html/sp/';
 var dir = {
   src  : _src,
@@ -59,12 +59,26 @@ gulp.task('copyStaticFiles', function() {
     .pipe(gulp.dest(dir.dest));
 });
 
+//- ----------------------------------------------------------- copy static files <
+gulp.task('make_include', function () {
+  gulp.src([dir.src + '**/_includes/*.jade'])
+    .pipe(changed( dir.dest ))
+    .pipe(plumber())
+    .pipe(jade({
+      pretty: true
+    }))
+    .pipe(gulpif(IS_HARDCASE, replace(/  /g, '\t')))
+    .pipe(rename({extname:'.inc', dirname:'assets/include/'}))
+    .pipe(gulp.dest(dir.dest));
+});
+
 //- ===================================================================  stylesheets <
 gulp.task('stylesheets', function(){
   var prefixer = ['last 4 versions','ie 8', 'ie 9', 'Firefox >= 2', 'Opera 12.1', 'ios 6', 'android 4'];
   if (!_isPC) prefixer =  ['last 2 versions', 'ios 6', 'android 4'];
   
   gulp.src([dir.src + '**/*.+(scss|styl|less|)', '!' + dir.src + '**/_*'])
+  .pipe(plumber())
   .pipe(changed( dir.dest ))
   //- ----------------------------------------------------------- styls <
   .pipe(gulpif(/[.]styl$/, stylus({
@@ -75,7 +89,6 @@ gulp.task('stylesheets', function(){
     )
   )
   //- -----------------------------------------------------------  utils <
-  .pipe(plumber())
   .pipe(
     pleeease({
       autoprefixer : {
@@ -135,7 +148,6 @@ gulp.task('optimizeImage', function(){
 var SPRITE_MODE = {
   ASSETS  : 0
 };
-
 
 gulp.task('makeSprite',  function () {
   var _source, _imgOutput, _scssOutput, _prefix, _mode;
